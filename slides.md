@@ -33,6 +33,13 @@ MP-SPDZ项目部分代码分析
   <div>2024年6月12日</div>
 </div>
 
+<div class="abs-br m-6 flex gap-2">
+  <a href="https://github.com/data61/MP-SPDZ" target="_blank" alt="GitHub" title="Open in GitHub"
+    class="text-xl slidev-icon-btn opacity-50 !border-none !hover:text-white">
+    <carbon-logo-github />
+  </a>
+</div>
+
 <!--
 The last comment block of each slide will be treated as slide notes. It will be visible and editable in Presenter Mode along with the slide. [Read more in the docs](https://sli.dev/guide/syntax.html#notes)
 -->
@@ -69,8 +76,6 @@ transition: slide-left
   **意义**：理解这套指令系统，可以帮助我们更加轻松地添加自定义协议和指令
 </div>
 
-<!-- [源项目地址]() -->
-
 <!--
 You can have `style` tag in markdown to override the style for the current page.
 Learn more: https://sli.dev/guide/syntax#embedded-styles
@@ -90,3 +95,12 @@ src: ./pages/compile.md
 ---
 src: ./pages/instructions.md
 ---
+
+
+---
+layout: end
+---
+
+# 项目汇报结束
+
+感谢聆听

@@ -22,7 +22,7 @@ class: text-base
 
 - `Processor/Instruction.hpp`
 
-    定义并实现了很多和指令相关的方法，并且针对不同的指令定义了不同的`X`宏
+    定义并实现了很多和指令相关的方法（包括程序指令执行的逻辑），并且针对不同的指令定义了不同的`X`宏
 
 
 ---
@@ -161,4 +161,114 @@ class: text-base
 # 指令行为
 —— 案例驱动的指令分析
 
-在`Processor/instructions.h`
+在`Processor/instructions.h`中可以查看`ldsi`和`adds`的语义（主要分析这两个指令）：
+
+```cpp
+X(LDSI, auto dest = &Procp.get_S()[r[0]]; \
+        auto tmp = sint::constant(int(n), Proc.P.my_num(), Procp.MC.get_alphai()), \
+        *dest++ = tmp) \
+X(ADDS, auto dest = &Procp.get_S()[r[0]]; auto op1 = &Procp.get_S()[r[1]]; \
+        auto op2 = &Procp.get_S()[r[2]], \
+        *dest++ = *op1++ + *op2++) \
+```
+
+`X`的宏定义位于`Processor/Instruction.hpp`的`Program::execute`方法中：
+
+<!-- 实际上Instruction::execute方法中也有 -->
+
+<div grid="~ cols-2 gap-12">
+<div>
+
+```cpp
+#define X(NAME, PRE, CODE) \
+        case NAME: { PRE; for (int i = 0; i < size; i++) { CODE; } } break;
+```
+
+例如将`LDSI`指令带入到宏，会得到右边的宏展开：
+
+</div>
+<div>
+
+```cpp
+case LDSI: { // NAME
+    auto dest = &Procp.get_S()[r[0]]; // PRE
+    auto tmp = sint::constant(int(n), Proc.P.my_num(), Procp.MC.get_alphai());
+    for (int i = 0; i < size; i++) {
+        *dest++ = tmp; // CODE
+    }
+} break;
+```
+
+</div>
+</div>
+
+
+
+---
+transition: slide-left
+class: text-base
+---
+
+# 程序执行的基本框架
+—— 程序的底层行为
+
+实际上`Program::execute`方法中包含所有指令的`X`宏，整体结构就是通过switch根据指令名选择要执行的操作
+
+重新整理一下逻辑，程序的执行`execute`核心就是以下的步骤：
+
+```cpp {all}{lines:true}
+// 1. 准备好全局变量
+unsigned int size = p.size();
+Proc.PC=0;
+...
+while (Proc.PC<size) // 2. 主循环，执行完所有指令后退出
+{   // 3. 更新每次执行的局部变量
+    auto& instruction = p[Proc.PC];
+    auto& r = instruction.r; // 寄存器
+    auto& n = instruction.n; // 立即数的值
+    ...
+    Proc.PC++; // 4. PC指针加一
+    // 5. 根据指令名选择的switch
+    switch(instruction.get_opcode()) {
+        case LDSI: {
+            // preprocess and execution behavior
+        } break;
+        ... // 更多的指令。。。
+```
+
+<!-- 这就是程序执行时的思路 -->
+
+
+
+---
+transition: slide-left
+class: text-base
+---
+
+# 指令行为
+—— 案例驱动的指令分析
+
+回过头来再看看`LDSI`和`ADDS`到底在做什么？
+
+1. 预处理
+
+    ```cpp
+    auto dest = &Procp.get_S()[r[0]];
+    auto tmp = sint::constant(int(n), Proc.P.my_num(), Procp.MC.get_alphai());
+    ```
+
+    从子处理器(`SubProcessor`)中获取s寄存器的首地址，并将该地址赋值给了dest
+
+    根据立即数的值`n`创建了一个`sint`的密文数据，将其赋值给了tmp
+
+2. 执行
+
+    ```cpp
+    for (int i = 0; i < size; i++) {
+        *dest++ = tmp; // CODE
+    }
+    ```
+
+    从dest地址开始的`size`长度的连续地址空间，均加载同样的密文数据值
+
+<!-- 个人猜测是s寄存器的大小随程序的长度而增长 -->

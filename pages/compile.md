@@ -25,6 +25,8 @@ Scripts/ring.sh tutorial
 
   这里对应的协议二进制文件就是`replicated-ring-party.x`
 
+<!-- 还有一种直接编译运行在一条命令的方式：`Scripts/compile-run.py -E ring tutorial` -->
+
 
 
 ---
