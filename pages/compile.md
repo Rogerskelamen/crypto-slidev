@@ -110,7 +110,7 @@ run_player replicated-ring-party.x $* || exit 1
 
 1. 设置环境变量，其中<u>比较重要的是</u>`PLAYERS`，它决定了有多少个参与方（如果有多个参与方就需要使用`Scripts/setup-ssl.sh`来生成各方的SSL密钥）
 
-2. 载入<u>`Scripts/run-common.sh`</u>脚本，使用其中定义的`run-player`方法来执行程序
+2. 载入<u>`Scripts/run-common.sh`</u>脚本，使用其中定义的`run_player`方法来执行程序
 
 
 

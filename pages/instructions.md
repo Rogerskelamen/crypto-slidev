@@ -33,7 +33,7 @@ transition: slide-left
 # 指令类型
 
 - 存取指令：Load and store
-- 硬件指令：Machine
+- 机器指令：Machine
 - 基本算术：Basic arithmetic
 - 位运算：Bitwise operations
 - 带立即数的运算：Arithmetic with immediate
@@ -41,7 +41,7 @@ transition: slide-left
 - 数据访问：Data access instructions
 - 输入输出：I/O
 - 整型操作：Integer operations
-- 比较清除：Clear comparison
+- 明文比较：Clear comparison
 - 跳转指令：Jumps
 - 类型转换：Conversion
 - 其他：Other instructions
@@ -272,3 +272,36 @@ class: text-base
     从dest地址开始的`size`长度的连续地址空间，均加载同样的密文数据值
 
 <!-- 个人猜测是s寄存器的大小随程序的长度而增长 -->
+
+
+
+---
+transition: slide-left
+---
+
+# 指令行为
+—— 案例驱动的指令分析
+
+针对不同的指令类型，会有不同的`X`宏定义（`Processor/Instruction.hpp`）：
+
+```cpp
+#define X(NAME, PRE, CODE) \
+        case NAME: { PRE; for (int i = 0; i < size; i++) { CODE; } } break;
+        ARITHMETIC_INSTRUCTIONS
+#undef X
+#define X(NAME, PRE, CODE) case NAME:
+        CLEAR_GF2N_INSTRUCTIONS
+        instruction.execute_clear_gf2n(Proc2.get_C(), Proc.machine.M2.MC, Proc); break;
+#undef X
+#define X(NAME, PRE, CODE) case NAME:
+        REGINT_INSTRUCTIONS
+        instruction.execute_regint(Proc, Proc.machine.Mi.MC); break;
+#undef X
+#define X(NAME, CODE) case NAME: CODE; break;
+        COMBI_INSTRUCTIONS
+#undef X
+```
+
+每种类型的指令根据语义的不同，进行出不同的宏展开，最终实现程序执行
+
+<!-- 这就是整个指令系统在程序执行中的作用 -->
